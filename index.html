@@ -1,23 +1,26 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Моё портфолио</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <header>
-    <nav>
-      <a href="index.html">Обо мне</a>
-      <a href="projects.html">Проекты</a>
-      <a href="gallery.html">Галерея</a>
-    </nav>
-  </header>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>dima b</title>
 
-  <main class="hero">
-    <h1>Привет! Я [Имя]</h1>
-    <p>Графический дизайнер. Люблю создавать стильные и удобные визуальные решения.</p>
-  </main>
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- p5.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+  <!-- ml5.js (must come AFTER p5.js, BEFORE your script.js) -->
+  <script src="https://unpkg.com/ml5@0.12.2/dist/ml5.min.js"></script>
+  <!-- your script (defer so it waits until ml5 is loaded) -->
+  <script src="script.js" defer></script>
+</head>
+
+<body>
+  <div id="video-container">
+    <video id="webcam" autoplay playsinline></video>
+  </div>
+  <!-- Canvas will be created by p5.js -->
+  <script src="script.js"></script>
 </body>
 </html>

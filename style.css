@@ -1,0 +1,32 @@
+html, body {
+  margin: 0;
+  height: 100%;
+  background: #000;
+  display: flex;
+  justify-content: center; /* horizontal center */
+  align-items: center;     /* vertical center */
+}
+
+#video-container {
+  position: relative;
+  display: inline-block; /* shrink to fit video exactly */
+}
+
+#webcam {
+  transform: scaleX(-1); /* mirror */
+  display: block;
+  max-width: calc(100vw - 100px);  /* 50px margins left/right */
+  max-height: calc(100vh - 100px); /* 50px margins top/bottom */
+  width: auto;
+  height: auto;
+}
+
+.finger-label {
+  position: absolute;
+  color: white;
+  font-family: "Helvetica", sans-serif;
+  font-size: 18px;
+  font-weight: bold;
+  user-select: none;
+  line-height: 1.3em;
+}

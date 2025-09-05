@@ -1,34 +1,111 @@
+:root { --vh: 1vh; }
 html, body {
   margin: 0;
-  height: 100%;
-  background: #000;
-  display: flex;
-  justify-content: center; /* horizontal center */
-  align-items: center;     /* vertical center */
+  height: calc(var(--vh, 1vh) * 100);
+  background: #ffffff;
 }
 
-#video-container {
-  position: relative;
-  display: inline-block; /* shrink to fit video exactly */
-}
-
+/* Fullscreen video */
 #webcam {
+  position: fixed;
+  inset: 0;              /* top:0 right:0 bottom:0 left:0 */
+  width: 100vw;
+  height: calc(var(--vh, 1vh) * 100);
+  object-fit: cover;     /* fills, may crop */
   transform: scaleX(-1); /* mirror */
-  display: block;
-  max-width: calc(100vw - 100px);  /* 50px margins left/right */
-  max-height: calc(100vh - 100px); /* 50px margins top/bottom */
-  width: auto;
-  height: auto;
+  z-index: 0;
   opacity: 0;
+}
+
+/* Overlay for labels (same box as video) */
+#overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: calc(var(--vh, 1vh) * 100);
+  pointer-events: none;   /* labels won’t block clicks unless you want them to */
+  z-index: 1;
+}
+
+#main {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center; /* horizontal */
+  align-items: center;     /* vertical */
+  overflow: hidden;
+}
+
+@font-face {
+  font-family: 'SuisseIntl';
+  src: url('assets/fonts/SuisseIntl-Book.ttf') format('truetype');
+  font-style: normal;
+}
+@font-face {
+  font-family: 'SuisseWorks';
+  src: url('assets/fonts/SuisseWorks-Book.ttf') format('truetype');
+  font-style: normal;
 }
 
 .finger-label {
   position: absolute;
-  color: white;
-  font-family: "Arial Narrow", Arial, sans-serif;
-  font-size: 14px;
-  font-weight: bold;
-  user-select: none;
-  line-height: 0.8em;
-  max-width: 80px;
+  color: #444444;
+  font-family: 'SuisseIntl', sans-serif;
+  line-height: 0.8;
+  letter-spacing: -0.02em;
+  max-width: 140px;
+}
+
+/* left hand: links, different font */
+#overlay a.finger-label {
+  font-size: 18px;
+  font-family: 'SuisseIntI', sans-serif;
+  pointer-events: auto; /* links are clickable */
+  max-width: 200px;
+}
+
+/* right hand: plain text, different font */
+#overlay p.finger-label {
+  font-size: 16px;
+  font-family: 'SuisseWorks', sans-serif;
+}
+
+.background-text {
+  font-family: 'SuisseIntl', sans-serif;
+  font-size: 300px;
+  font-weight: 500;
+  line-height: 0.5;
+  letter-spacing: -0.07em;
+  text-align: center;
+  filter: blur(10px);
+  z-index: 0;
+  margin: 0;
+}
+
+/* each line its own color */
+.background-text .line1 { color: #E22F30; display: block; }
+.background-text .line2 { color: #FBC10C; display: block; }
+.background-text .line3 { color: #0692D4; display: block; }
+.background-text .line4 { color: #047A39; display: block; }
+.background-text .line5 { color: #FBC10C; display: block; }
+
+/* Left-bottom SVG */
+.bottom-left-svg {
+  position: fixed;      /* stays in corner while scrolling */
+  left: 30px;
+  bottom: 20px;
+  width: 48px;         /* adjust as needed */
+  height: auto;
+  z-index: 10;          /* above background text but below labels if needed */
+}
+
+/* Right-bottom year */
+.bottom-right-year {
+  position: fixed;
+  right: 30px;
+  bottom: 20px;
+  font-family: 'SuisseWorks', sans-serif;
+  font-size: 24px;
+  letter-spacing: -0.13em;
 }

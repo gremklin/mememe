@@ -4,17 +4,33 @@
 <meta charset="UTF-8">
 <title>dima b</title>
 <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-<div id="video-container">
-  <video id="webcam" autoplay playsinline></video>
-  <!-- labels for hand 1 and 2 will be added dynamically -->
-</div>
-
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
 <script src="script.js" defer></script>
+</head>
+<body>
+
+<div id="main">
+  <h1 class="background-text">
+    <span class="line1">dima</span>
+    <span class="line2">b</span>
+    <span class="line3">graphics</span>
+    <span class="line4">dpt.</span>
+  </h1>
+  <div id="overlay"></div>
+  <video id="webcam" autoplay playsinline></video>
+</div>
+
+<!-- Left bottom SVG -->
+<img src="assets/lil man.svg" alt="Lil Man" class="bottom-left-svg">
+
+<!-- Right bottom colored year -->
+<div class="bottom-right-year">
+  <span style="color:#E22F30">2</span>
+  <span style="color:#FBC10C">0</span>
+  <span style="color:#0692D4">2</span>
+  <span style="color:#047A39">5</span>
+</div>
 </body>
 </html>

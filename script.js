@@ -1,106 +1,109 @@
-let video, handpose, hands = [];
-const fingerTexts = 
-["1. my name is dima b i am a graphic designer",
-  "2. i value curiosity and fun in my work",
-  "3. i value curiosity and fun in my work",
-  "4. i value curiosity and fun in my work",
-  "5. i value curiosity and fun in my work"];
-const fingertipIndices = [4,8,12,16,20];
-const labels = [];
+let video;
+let hands;
+let results = null;
 
-// Smoothing and flicker
-let smoothKeypoints = [];
-let lastKeypoints = null;
-const flickerFrames = 5;
-let flickerCounter = 0;
+const fingertipIndices = [4, 8, 12, 16, 20];
+const fingerTexts = [
+  ["1. my name is dima b i am a graphic designer",
+   "2. i value curiosity and fun in my work",
+   "3. creativity drives me",
+   "4. I like experimenting",
+   "5. I love learning new things"],
+   
+  ["1. Hello from second hand",
+   "2. More fun text",
+   "3. Another line",
+   "4. Keep exploring",
+   "5. Enjoy the process"]
+];
+
+const labels = [[],[]]; // labels for each hand
+let smoothKeypoints = [[],[]];
 
 function setupLabels() {
   const container = document.getElementById("video-container");
-  fingerTexts.forEach(text => {
-    const p = document.createElement("p");
-    p.className = "finger-label";
-    p.textContent = text;
-    container.appendChild(p);
-    labels.push(p);
+  fingerTexts.forEach((handTexts, hIdx) => {
+    handTexts.forEach(text => {
+      const p = document.createElement("p");
+      p.className = "finger-label";
+      p.textContent = text;
+      container.appendChild(p);
+      labels[hIdx].push(p);
+    });
   });
 }
 
-async function setupVideo() {
+function initHands() {
+  hands = new Hands({
+    locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+  });
+
+  hands.setOptions({
+    maxNumHands: 2,
+    modelComplexity: 1,
+    minDetectionConfidence: 0.7,
+    minTrackingConfidence: 0.5
+  });
+
+  hands.onResults(res => {
+    results = res;
+  });
+}
+
+async function setupCamera() {
   video = document.getElementById("webcam");
-  const stream = await navigator.mediaDevices.getUserMedia({video:true});
+
+  const stream = await navigator.mediaDevices.getUserMedia({ video: true });
   video.srcObject = stream;
-
   await new Promise(resolve => video.onloadedmetadata = () => resolve());
-  video.play();
 
-  resizeVideo(); // set initial size
-  window.addEventListener("resize", resizeVideo);
-
-  // Load handpose
-  handpose = ml5.handpose(video, () => console.log("Handpose loaded"));
-  handpose.on("predict", results => {
-    hands = results;
-    if (hands.length > 0) {
-      lastKeypoints = hands[0].landmarks.map(k => [...k]);
-      flickerCounter = flickerFrames;
-    }
+  const camera = new Camera(video, {
+    onFrame: async () => {
+      await hands.send({image: video});
+    },
+    width: 640,
+    height: 480
   });
+  camera.start();
 }
 
-function resizeVideo() {
-  const maxWidth = window.innerWidth - 100; // 50px margins each side
-  const maxHeight = window.innerHeight - 100; // 50px margins top/bottom
-
-  const videoAspect = video.videoWidth / video.videoHeight;
-  const windowAspect = maxWidth / maxHeight;
-
-  if(videoAspect > windowAspect){
-    video.style.width = maxWidth + "px";
-    video.style.height = "auto";
-  } else {
-    video.style.width = "auto";
-    video.style.height = maxHeight + "px";
-  }
-}
+function lerp(start,end,amt){ return start+(end-start)*amt; }
 
 function updateLabels() {
-  if(hands.length === 0 && (!lastKeypoints || flickerCounter <= 0)) return;
-
-  const keypoints = hands.length > 0 ? hands[0].landmarks : lastKeypoints;
-  if(hands.length === 0) flickerCounter--;
-
-  if(smoothKeypoints.length === 0){
-    smoothKeypoints = keypoints.map(k => [...k]);
+  if (!results || !results.multiHandLandmarks || results.multiHandLandmarks.length === 0) {
+    return; // no hands → bail out early
   }
 
-  const scaleX = video.clientWidth / video.videoWidth;
-  const scaleY = video.clientHeight / video.videoHeight;
+  results.multiHandLandmarks.forEach((landmarks, hIdx) => {
+    if (!smoothKeypoints[hIdx] || smoothKeypoints[hIdx].length === 0) {
+      smoothKeypoints[hIdx] = landmarks.map(pt => [pt.x, pt.y]);
+    }
 
-  fingertipIndices.forEach((i, idx) => {
-    const [x, y] = keypoints[i];
-    smoothKeypoints[i][0] = lerp(smoothKeypoints[i][0], x, 0.3);
-    smoothKeypoints[i][1] = lerp(smoothKeypoints[i][1], y, 0.3);
+    fingertipIndices.forEach((i, idx) => {
+      let lx = lerp(smoothKeypoints[hIdx][i][0], landmarks[i].x, 0.3);
+      let ly = lerp(smoothKeypoints[hIdx][i][1], landmarks[i].y, 0.3);
+      smoothKeypoints[hIdx][i] = [lx, ly];
 
-    const finalX = video.clientWidth - (smoothKeypoints[i][0]*scaleX); // mirror
-    const finalY = smoothKeypoints[i][1]*scaleY;
+      const videoWidth = video.videoWidth;
+      const videoHeight = video.videoHeight;
 
-    labels[idx].style.left = finalX + "px";
-    labels[idx].style.top = finalY - 20 + "px"; // above fingertip
+      const finalX = videoWidth - (lx * videoWidth); // mirror
+      const finalY = ly * videoHeight;
+
+      if (labels[hIdx][idx]) {
+        labels[hIdx][idx].style.left = finalX + "px";
+        labels[hIdx][idx].style.top = finalY - 20 + "px";
+      }
+    });
   });
 }
 
-function lerp(start,end,amt){
-  return start + (end-start)*amt;
-}
-
-function animate(){
+function animate() {
   updateLabels();
   requestAnimationFrame(animate);
 }
 
-// Initialize
+// init
 setupLabels();
-setupVideo().then(()=>animate());
-
-window.addEventListener("resize", resizeVideo);
-video.onloadedmetadata = () => resizeVideo();
+initHands();
+setupCamera().then(()=>animate());

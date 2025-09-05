@@ -19,14 +19,16 @@ html, body {
   max-height: calc(100vh - 100px); /* 50px margins top/bottom */
   width: auto;
   height: auto;
+  opacity: 0;
 }
 
 .finger-label {
   position: absolute;
   color: white;
-  font-family: "Helvetica", sans-serif;
-  font-size: 18px;
+  font-family: "Arial Narrow", Arial, sans-serif;
+  font-size: 14px;
   font-weight: bold;
   user-select: none;
-  line-height: 1.3em;
+  line-height: 0.8em;
+  max-width: 80px;
 }

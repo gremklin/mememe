@@ -1,26 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>dima b</title>
-
-  <!-- Styles -->
-  <link rel="stylesheet" href="style.css" />
-
-  <!-- p5.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
-  <!-- ml5.js (must come AFTER p5.js, BEFORE your script.js) -->
-  <script src="https://unpkg.com/ml5@0.12.2/dist/ml5.min.js"></script>
-  <!-- your script (defer so it waits until ml5 is loaded) -->
-  <script src="script.js" defer></script>
+<meta charset="UTF-8">
+<title>dima b</title>
+<link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-  <div id="video-container">
-    <video id="webcam" autoplay playsinline></video>
-  </div>
-  <!-- Canvas will be created by p5.js -->
-  <script src="script.js"></script>
+
+<div id="video-container">
+  <video id="webcam" autoplay playsinline></video>
+  <!-- labels for hand 1 and 2 will be added dynamically -->
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+<script src="script.js" defer></script>
 </body>
 </html>

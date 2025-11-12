@@ -1,7 +1,20 @@
-:root { --vh: 1vh; }
+:root {
+  --vh: 1vh;
+  --color-text: #444444;
+  --color-text-strong: #222222;
+  --color-red: #E22F30;
+  --color-yellow: #FBC10C;
+  --color-blue: #0692D4;
+  --color-green: #047A39;
+  --font-sans: 'SuisseIntl', sans-serif;
+  --font-serif: 'SuisseWorks', sans-serif;
+  --page-margin: 25px;
+  --page-columns: 4;
+  --page-gutter: 50px;
+}
 html, body {
   margin: 0;
-  height: calc(var(--vh, 1vh) * 100);
+  height: 100dvh;
   background: #ffffff;
 }
 
@@ -10,7 +23,7 @@ html, body {
   position: fixed;
   inset: 0;              /* top:0 right:0 bottom:0 left:0 */
   width: 100vw;
-  height: calc(var(--vh, 1vh) * 100);
+  height: 100dvh;
   object-fit: cover;     /* fills, may crop */
   transform: scaleX(-1); /* mirror */
   z-index: 0;
@@ -22,7 +35,7 @@ html, body {
   position: fixed;
   inset: 0;
   width: 100vw;
-  height: calc(var(--vh, 1vh) * 100);
+  height: 100dvh;
   pointer-events: none;   /* labels won’t block clicks unless you want them to */
   z-index: 1;
 }
@@ -30,7 +43,7 @@ html, body {
 #main {
   position: relative;
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
   display: flex;
   justify-content: center; /* horizontal */
   align-items: center;     /* vertical */
@@ -41,26 +54,29 @@ html, body {
   font-family: 'SuisseIntl';
   src: url('assets/fonts/SuisseIntl-Book.ttf') format('truetype');
   font-style: normal;
+  font-display: swap;
 }
 @font-face {
   font-family: 'SuisseWorks';
   src: url('assets/fonts/SuisseWorks-Book.ttf') format('truetype');
   font-style: normal;
+  font-display: swap;
 }
 
 .finger-label {
   position: absolute;
-  color: #444444;
-  font-family: 'SuisseIntl', sans-serif;
+  color: var(--color-text);
+  font-family: var(--font-sans);
   line-height: 0.8;
   letter-spacing: -0.02em;
   max-width: 140px;
+  opacity: 0; /* hidden until a hand is detected */
 }
 
 /* left hand: links, different font */
 #overlay a.finger-label {
   font-size: 18px;
-  font-family: 'SuisseIntI', sans-serif;
+  font-family: var(--font-sans);
   pointer-events: auto; /* links are clickable */
   max-width: 200px;
 }
@@ -68,11 +84,39 @@ html, body {
 /* right hand: plain text, different font */
 #overlay p.finger-label {
   font-size: 16px;
-  font-family: 'SuisseWorks', sans-serif;
+  font-family: var(--font-serif);
 }
 
-.background-text {
+.no-camera #webcam { display: none; }
+.no-camera #overlay { display: none; }
+
+#static-fallback {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fallback-links {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fallback-links a {
   font-family: 'SuisseIntl', sans-serif;
+  font-size: 20px;
+  color: #444444;
+  text-decoration: none;
+}
+
+.fallback-links a:hover { text-decoration: underline; }
+
+.background-text {
+  font-family: var(--font-sans);
   font-size: 300px;
   font-weight: 500;
   line-height: 0.5;
@@ -84,11 +128,10 @@ html, body {
 }
 
 /* each line its own color */
-.background-text .line1 { color: #E22F30; display: block; }
-.background-text .line2 { color: #FBC10C; display: block; }
-.background-text .line3 { color: #0692D4; display: block; }
-.background-text .line4 { color: #047A39; display: block; }
-.background-text .line5 { color: #FBC10C; display: block; }
+.background-text .line1 { color: var(--color-red); display: block; }
+.background-text .line2 { color: var(--color-yellow); display: block; }
+.background-text .line3 { color: var(--color-blue); display: block; }
+.background-text .line4 { color: var(--color-green); display: block; }
 
 /* Left-bottom SVG */
 .bottom-left-svg {
@@ -105,7 +148,141 @@ html, body {
   position: fixed;
   right: 30px;
   bottom: 20px;
-  font-family: 'SuisseWorks', sans-serif;
+  font-family: var(--font-serif);
   font-size: 24px;
   letter-spacing: -0.13em;
+}
+
+/* --- Gallery page --- */
+body.page-gallery { --page-accent: var(--color-yellow); }
+
+
+#page-header {
+  margin: var(--page-margin);
+  position: relative;
+  z-index: 10;
+  height: 380px; /* reserve space so content doesn't overlap header */
+}
+
+.page-grid {
+  margin: var(--page-margin);
+  display: grid;
+  grid-template-columns: repeat(var(--page-columns), 1fr);
+  gap: var(--page-gutter);
+}
+
+.page-intro {
+  grid-column: 1 / -1;
+  font-family: var(--font-serif);
+  font-size: 16px;
+  line-height: 1.2;
+  position: absolute;
+  left: 280px;
+  top: 80px;
+  width: 200px;
+}
+
+.page-title {
+  grid-column: 1 / -1;
+  font-family: var(--font-sans);
+  font-size: 120px; /* adjusted */
+  font-weight: 500;
+  letter-spacing: -0.07em;
+  line-height: 0.8;
+  color: var(--page-accent);
+  filter: blur(6px);
+  position: absolute;
+  left: var(--page-margin);
+  top: var(--page-margin);
+  margin: 0;
+  text-align: left;
+}
+
+/* Specific gallery header positioning per Figma: 1440px wide reference
+   intro: 330px right, 130px down, width 200px; title under intro */
+/* page-specific tweaks can override the universal positions if needed */
+
+.page-nav {
+  position: fixed;
+  top: 50px;
+  right: var(--page-margin);
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
+  column-gap: 18px;
+  font-family: var(--font-sans);
+  z-index: 2000;
+}
+.page-nav a {
+  color: var(--color-text);
+  text-decoration: none;
+}
+.page-nav a:hover { text-decoration: underline; }
+.page-nav .is-missing { visibility: hidden; } /* keep void where link would be */
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  padding: 40px;
+  align-items: start; /* prevent items from stretching to tallest */
+}
+
+.gallery-item {
+  display: block;
+  position: relative;
+  align-self: start; /* ensure item matches its content height */
+}
+
+.gallery-item img {
+  width: 100%;
+  height: auto;
+  display: block;
+  cursor: none; /* hide system cursor only over actual image */
+}
+
+/* floating text cursor */
+#cursor-label {
+  position: fixed;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 1000;
+  font-family: var(--font-sans);
+  font-size: 16px;
+  color: var(--color-text-strong);
+  background: rgba(255,255,255,0.7);
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid #ddd;
+  opacity: 0;
+}
+
+/* --- Reusable text styles --- */
+.text-sans-small {
+  font-family: var(--font-sans);
+  font-size: 16px;           /* match link finger labels */
+  line-height: 0.8;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+  font-weight: 400;
+}
+
+.text-serif-small {
+  font-family: var(--font-serif);
+  font-size: 14px;           /* match text finger labels */
+  line-height: 0.8;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+  font-weight: 400;          /* ensure book weight */
+  font-synthesis: none;      /* prevent synthetic bold/italic */
+}
+
+.text-title {
+  font-family: var(--font-sans);
+  font-size: 120px;
+  font-weight: 500;
+  line-height: 0.8;
+  letter-spacing: -0.07em;
 }

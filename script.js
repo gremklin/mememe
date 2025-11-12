@@ -1,3 +1,5 @@
+'use strict';
+
 let video;
 let handsProcessor;        // MediaPipe Hands instance
 let results = null;        // latest onResults payload
@@ -8,11 +10,11 @@ const fingertipIndices = [4, 8, 12, 16, 20];
 // two sets of label text: [0] -> left hand set, [1] -> right hand set
 const fingerTexts = [
   [ // left hand: use links
-    { text: "2.1. graphics dept.", href: "/" },
-    { text: "2.2. projects", href: "/projects.html" },
-    { text: "2.3. gallery", href: "/gallery.html" },
-    { text: "2.4. index", href: "/index.html" },
-    { text: "2.5. about", href: "/about.html" }
+    { text: "2.1. graphics dept.", href: "index.html" },
+    { text: "2.2. projects", href: "projects.html" },
+    { text: "2.3. gallery", href: "gallery.html" },
+    { text: "2.4. index", href: "projects-index.html" },
+    { text: "2.5. about", href: "about.html" }
   ],
   [ // right hand: plain text
     { text: "1.1. my name is dima b i am a graphic designer" },
@@ -34,7 +36,12 @@ let flickerCounter  = [0, 0];
 const swapHandsForMirror = true;
 
 // ---------- helpers ----------
-function lerp(a, b, t) { return a + (b - a) * t; }
+function linearInterpolate(a, b, t) {
+  if (window.Utils && typeof window.Utils.linearInterpolate === 'function') {
+    return window.Utils.linearInterpolate(a, b, t);
+  }
+  return a + (b - a) * t;
+}
 
 // Map normalized landmark coordinates (x,y in 0..1) to overlay pixels for object-fit: cover
 function mapPointCover(xNorm, yNorm) {
@@ -113,6 +120,7 @@ function initHands() {
 // Start camera and feed frames to MediaPipe
 async function setupCameraAndStart() {
   video = document.getElementById('webcam');
+  try {
   const stream = await navigator.mediaDevices.getUserMedia({
     video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }
   });
@@ -128,6 +136,9 @@ async function setupCameraAndStart() {
     height: video.videoHeight || 480
   });
   camera.start();
+  } catch (err) {
+    enableStaticFallback();
+  }
 }
 
 // Main label update logic:
@@ -192,9 +203,9 @@ function updateLabels() {
       const targetX = keypoints[ptIndex][0];
       const targetY = keypoints[ptIndex][1];
 
-      // smoothing (in normalized space)
-      smoothKeypoints[h][ptIndex][0] = lerp(smoothKeypoints[h][ptIndex][0], targetX, 0.32);
-      smoothKeypoints[h][ptIndex][1] = lerp(smoothKeypoints[h][ptIndex][1], targetY, 0.32);
+      // stronger smoothing to reduce jitter (lower t)
+      smoothKeypoints[h][ptIndex][0] = linearInterpolate(smoothKeypoints[h][ptIndex][0], targetX, 0.18);
+      smoothKeypoints[h][ptIndex][1] = linearInterpolate(smoothKeypoints[h][ptIndex][1], targetY, 0.18);
 
       const mapped = mapPointCover(smoothKeypoints[h][ptIndex][0], smoothKeypoints[h][ptIndex][1]);
 
@@ -207,8 +218,11 @@ function updateLabels() {
         lbl.style.opacity = 0;
       } else {
         lbl.style.opacity = 1;
-        lbl.style.left = `${mapped.x}px`;
-        lbl.style.top  = `${mapped.y - 20}px`;
+        // pixel rounding to reduce sub-pixel shimmer
+        const px = Math.round(mapped.x);
+        const py = Math.round(mapped.y - 20);
+        lbl.style.left = `${px}px`;
+        lbl.style.top  = `${py}px`;
       }
     });
   }
@@ -224,3 +238,27 @@ function animate() {
 setupLabels();
 initHands();
 setupCameraAndStart().then(() => animate());
+
+// --- Static fallback when camera not available/denied ---
+function enableStaticFallback() {
+  document.body.classList.add('no-camera');
+  // Hide interactive layers if present
+  const overlay = document.getElementById('overlay');
+  const cam = document.getElementById('webcam');
+  if (overlay) overlay.style.display = 'none';
+  if (cam) cam.style.display = 'none';
+
+  // Build a simple centered fallback using the left-hand link set
+  const fallback = document.createElement('div');
+  fallback.id = 'static-fallback';
+  const list = document.createElement('nav');
+  list.className = 'fallback-links';
+  (fingerTexts[0] || []).forEach(item => {
+    const a = document.createElement('a');
+    a.href = item.href || '#';
+    a.textContent = item.text;
+    list.appendChild(a);
+  });
+  fallback.appendChild(list);
+  document.body.appendChild(fallback);
+}
